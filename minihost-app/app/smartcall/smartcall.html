@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCall — Never miss a guest emergency | MiniHost</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --black: #2d2d2d;
+            --white: #fff;
+            --cream: #fffbf5;
+            --gray: #888;
+            --pink: #fce7f3;
+            --pink-dark: #ec4899;
+            --blue: #dbeafe;
+            --blue-dark: #3b82f6;
+            --purple: #ede9fe;
+            --purple-dark: #8b5cf6;
+            --green: #d1fae5;
+            --green-dark: #10b981;
+            --yellow: #fef3c7;
+            --yellow-dark: #f59e0b;
+            --red-light: #fee2e2;
+            --red: #ef4444;
+        }
+        
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #fdf4ff 0%, #faf5ff 50%, #f0f9ff 100%);
+            color: var(--black); 
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Floating decorations */
+        .floaties {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .floaty {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+        .floaty:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .floaty:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+        .floaty:nth-child(3) { top: 60%; left: 8%; animation-delay: 2s; }
+        .floaty:nth-child(4) { top: 70%; right: 5%; animation-delay: 3s; }
+        .floaty:nth-child(5) { top: 40%; left: 3%; animation-delay: 4s; }
+        .floaty:nth-child(6) { top: 85%; right: 15%; animation-delay: 5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* Header */
+        header { 
+            position: relative;
+            z-index: 10;
+            padding: 1.5rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .logo { 
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            color: var(--black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .back-link {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-link:hover {
+            color: var(--pink-dark);
+        }
+
+        /* Main content */
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+        }
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+            color: var(--purple-dark);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.05em;
+            border: 2px solid var(--purple-dark);
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--purple-dark) 0%, var(--pink-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-sub {
+            font-size: 1.15rem;
+            color: var(--gray);
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .hero-sub .sparkle {
+            display: inline-block;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        /* The problem */
+        .problem-section {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .scenario {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 2px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+        .scenario::before {
+            content: '😰';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+        .scenario-time {
+            display: inline-block;
+            background: var(--blue);
+            color: var(--blue-dark);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+        .scenario h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .scenario-story {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.8;
+        }
+        .scenario-story p {
+            margin-bottom: 0.75rem;
+        }
+        .scenario-result {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: var(--red-light);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .scenario-result::before {
+            content: '💔';
+            font-size: 1.25rem;
+        }
+
+        /* The solution */
+        .solution-section {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: var(--white);
+            padding: 5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .solution-section::before {
+            content: '✨';
+            position: absolute;
+            top: 30px;
+            left: 10%;
+            font-size: 2rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        .solution-section::after {
+            content: '⭐';
+            position: absolute;
+            bottom: 30px;
+            right: 10%;
+            font-size: 1.5rem;
+            animation: sparkle 2s ease-in-out infinite 0.5s;
+        }
+        .solution-section h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .solution-section > p {
+            color: #a5b4fc;
+            font-size: 1.1rem;
+            max-width: 450px;
+            margin: 0 auto 3rem;
+        }
+        .solution-box {
+            max-width: 450px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .solution-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+        .solution-box h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .solution-box p {
+            color: #c7d2fe;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* How it works */
+        .how-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+        .how-section h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .how-section > p {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 3rem;
+        }
+        .how-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .how-step {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+        .how-step:hover {
+            transform: translateX(8px);
+            border-color: var(--purple);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+        }
+        .how-step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .how-step:nth-child(1) .how-step-icon { background: var(--pink); }
+        .how-step:nth-child(2) .how-step-icon { background: var(--purple); }
+        .how-step:nth-child(3) .how-step-icon { background: var(--green); }
+        .how-step-content h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .how-step-content p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* What it's not */
+        .not-section {
+            background: var(--white);
+            padding: 4rem 2rem;
+        }
+        .not-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .not-container h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+        }
+        .not-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .not-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .not-icon {
+            width: 60px;
+            height: 60px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            position: relative;
+        }
+        .not-icon::after {
+            content: '✕';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 22px;
+            height: 22px;
+            background: var(--red);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .not-item p {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        .not-only {
+            margin-top: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--green);
+            color: var(--green-dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+        }
+
+        /* The magic moment */
+        .magic-section {
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        .magic-section h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .magic-section > p {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        .magic-card {
+            background: linear-gradient(135deg, var(--green) 0%, #a7f3d0 100%);
+            border: 3px solid var(--green-dark);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .magic-card::before {
+            content: '🎉';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+        }
+        .magic-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .magic-card-avatar {
+            width: 55px;
+            height: 55px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .magic-card-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid var(--green-dark);
+            animation: ring 1.5s ease-in-out infinite;
+        }
+        @keyframes ring {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+        .magic-card-header div h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .magic-card-header div span {
+            font-size: 0.8rem;
+            color: var(--green-dark);
+            background: var(--white);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+        }
+        .magic-card p {
+            font-size: 0.95rem;
+            color: #166534;
+            line-height: 1.6;
+        }
+        .magic-card .result {
+            margin-top: 1rem;
+            font-weight: 700;
+            color: var(--green-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* CTA */
+        .cta-section {
+            max-width: 550px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem;
+            text-align: center;
+        }
+        .cta-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 2px solid #f0f0f0;
+        }
+        .cta-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .cta-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .cta-card > p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--purple-dark) 0%, var(--pink-dark) 100%);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+        .cta-note {
+            margin-top: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        .cta-note span {
+            display: inline-block;
+            margin: 0 0.15rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .not-grid { gap: 1.5rem; }
+            .how-step { flex-direction: column; text-align: center; }
+            .how-step-icon { margin: 0 auto; }
+            .floaties { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating decorations -->
+    <div class="floaties">
+        <span class="floaty">✨</span>
+        <span class="floaty">⭐</span>
+        <span class="floaty">💫</span>
+        <span class="floaty">🌙</span>
+        <span class="floaty">☁️</span>
+        <span class="floaty">💜</span>
+    </div>
+
+    <div class="content">
+        <header>
+            <a href="#" class="logo">🏠 minihost</a>
+            <a href="#" class="back-link">← Back home</a>
+        </header>
+
+        <section class="hero">
+            <div class="hero-icon">📱</div>
+            <div class="hero-badge">✨ SmartCall</div>
+            <h1>When a guest stays at your place, their calls get through</h1>
+            <p class="hero-sub">Even if your phone is on silent. Even at 2am. <span class="sparkle">✨</span> Only them.</p>
+        </section>
+
+        <!-- The problem -->
+        <section class="problem-section">
+            <div class="scenario">
+                <div class="scenario-time">🌙 Tuesday, 2:14 AM</div>
+                <h2>Your phone is on silent. As it should be.</h2>
+                <div class="scenario-story">
+                    <p>Sophie just landed. She's been traveling for 9 hours. She's standing outside your apartment with two suitcases, and the lockbox code isn't working.</p>
+                    <p>She calls you. Once. Twice. Three times.</p>
+                    <p>You're asleep. Your phone doesn't ring.</p>
+                </div>
+                <div class="scenario-result">
+                    Sophie sleeps in a hotel. You wake up to a 3-star review.
+                </div>
+            </div>
+        </section>
+
+        <!-- The solution -->
+        <section class="solution-section">
+            <h2>There's a better way ✨</h2>
+            <p>SmartCall makes your current guest's phone number a priority. Their calls get through — no matter what.</p>
+            
+            <div class="solution-box">
+                <div class="solution-icon">🛡️</div>
+                <h3>Only the guest. Only during their stay.</h3>
+                <p>Not spam. Not your bank. Not your ex. Just the person sleeping in your apartment right now — if they need you.</p>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="how-section">
+            <h2>How it works ✨</h2>
+            <p>Completely automatic. Zero effort.</p>
+            <div class="how-steps">
+                <div class="how-step">
+                    <div class="how-step-icon">📅</div>
+                    <div class="how-step-content">
+                        <h3>A guest books your place</h3>
+                        <p>MiniHost sees it in your calendar and grabs their phone number from the reservation.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="how-step-icon">👑</div>
+                    <div class="how-step-content">
+                        <h3>During their stay, they become VIP</h3>
+                        <p>Their number bypasses silent mode. Only their calls get through.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="how-step-icon">✅</div>
+                    <div class="how-step-content">
+                        <h3>They check out, VIP ends</h3>
+                        <p>Automatically. Next guest becomes the new VIP. You don't lift a finger.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What it's not -->
+        <section class="not-section">
+            <div class="not-container">
+                <h2>SmartCall is picky 💅</h2>
+                <div class="not-grid">
+                    <div class="not-item">
+                        <div class="not-icon">📵</div>
+                        <p>Spam</p>
+                    </div>
+                    <div class="not-item">
+                        <div class="not-icon">🏦</div>
+                        <p>Your bank</p>
+                    </div>
+                    <div class="not-item">
+                        <div class="not-icon">👻</div>
+                        <p>Randoms</p>
+                    </div>
+                </div>
+                <div class="not-only">✓ Only your current guest</div>
+            </div>
+        </section>
+
+        <!-- The magic moment -->
+        <section class="magic-section">
+            <h2>Same story. Happy ending. 💖</h2>
+            <p>With SmartCall enabled:</p>
+            
+            <div class="magic-card">
+                <div class="magic-card-header">
+                    <div class="magic-card-avatar">👩</div>
+                    <div>
+                        <h3>Sophie D.</h3>
+                        <span>🟢 Calling now</span>
+                    </div>
+                </div>
+                <p>Your phone rings. You wake up, answer, and walk her through the lockbox. She's inside in 2 minutes.</p>
+                <p class="result">⭐⭐⭐⭐⭐ Sophie mentions how responsive you were!</p>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-card">
+                <div class="cta-icon">😴💤</div>
+                <h2>Sleep tight. We've got you.</h2>
+                <p>SmartCall is included in every MiniHost plan.</p>
+                <a href="#" class="cta-button">Get MiniHost — €9/month</a>
+                <p class="cta-note">
+                    <span>📞 SmartCall</span> + 
+                    <span>☀️ DailyDigest</span> + 
+                    <span>🔮 SecretScripts</span> + 
+                    <span>🤖 AiReply</span> + 
+                    <span>📖 GuestBook</span>
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2024 MiniHost — The little helper for Airbnb hosts 🏠💜</p>
+        </footer>
+    </div>
+</body>
+</html>
