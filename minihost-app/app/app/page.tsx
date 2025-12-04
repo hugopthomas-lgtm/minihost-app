@@ -34,11 +34,37 @@ export default function AppDashboard() {
   const generateReply = async () => {
     if (!guestMessage.trim()) return
     setGenerating(true)
-    // TODO: Call Claude API
-    setTimeout(() => {
-      setGeneratedReply(`Hi there! Thank you for your message. I'd be happy to help with your request. Our check-in time is 4 PM, but if you need early check-in, just let me know and I'll see what I can do. Looking forward to hosting you! 😊`)
+    setGeneratedReply('')
+    
+    try {
+      const response = await fetch('/api/generate-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guestMessage,
+          hostSettings: {
+            tone: 'warm and friendly',
+            replyLength: 'medium',
+            greeting: 'Hi',
+            signOff: 'Best regards',
+            checkInTime: '4 PM',
+            checkOutTime: '10 AM'
+          }
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.error) {
+        setGeneratedReply('Sorry, there was an error generating the reply. Please try again.')
+      } else {
+        setGeneratedReply(data.reply)
+      }
+    } catch (error) {
+      setGeneratedReply('Sorry, there was an error. Please try again.')
+    } finally {
       setGenerating(false)
-    }, 1500)
+    }
   }
 
   if (loading) {
