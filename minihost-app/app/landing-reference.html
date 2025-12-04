@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniHost — The little helper for Airbnb hosts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #f8f9fa;
+            --white: #fff;
+            --gray-50: #f1f3f4;
+            --gray-100: #e8eaed;
+            --gray-300: #dadce0;
+            --gray-400: #9aa0a6;
+            --gray-600: #5f6368;
+            --gray-800: #3c4043;
+            --gray-900: #202124;
+            --mint: #34a853;
+            --mint-light: #e6f4ea;
+            --blue: #4285f4;
+            --blue-light: #e8f0fe;
+            --peach: #fbbc04;
+            --peach-light: #fef7e0;
+            --coral: #ff6b6b;
+            --coral-light: #ffe8e8;
+            --purple: #a855f7;
+            --purple-light: #f3e8ff;
+        }
+        
+        body { 
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--bg); 
+            color: var(--gray-900); 
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Nav */
+        .nav {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--gray-900);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(145deg, #b8e6d4 0%, #7fd4b3 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(127, 212, 179, 0.25);
+        }
+
+        .nav-logo-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .nav-cta {
+            background: var(--gray-900);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--gray-800);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 40px 100px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 32px;
+        }
+
+        .hero-badge span {
+            font-size: 16px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--mint) 0%, #5cb89c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--gray-600);
+            max-width: 500px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--mint);
+            color: white;
+            padding: 18px 36px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 17px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(52, 168, 83, 0.3);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(52, 168, 83, 0.35);
+        }
+
+        .hero-cta svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .hero-sub {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        /* Preview */
+        .preview {
+            max-width: 700px;
+            margin: 60px auto 0;
+            padding: 0 40px;
+        }
+
+        .preview-card {
+            background: var(--white);
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .preview-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(145deg, #fef7e0 0%, #fde68a 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .preview-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .preview-header p {
+            font-size: 13px;
+            color: var(--gray-400);
+        }
+
+        .preview-header-date {
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--gray-400);
+        }
+
+        .preview-content {
+            font-size: 16px;
+            color: var(--gray-800);
+            line-height: 1.7;
+        }
+
+        .preview-content p {
+            margin-bottom: 14px;
+        }
+
+        .preview-alert {
+            background: var(--peach-light);
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin: 18px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .preview-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--mint-light);
+            color: var(--mint);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Features */
+        .features {
+            padding: 120px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .features-header h2 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .features-header p {
+            font-size: 18px;
+            color: var(--gray-600);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 36px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon.mint { background: var(--mint-light); }
+        .feature-icon.blue { background: var(--blue-light); }
+        .feature-icon.peach { background: var(--peach-light); }
+        .feature-icon.purple { background: var(--purple-light); }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .feature-tag.free {
+            background: var(--mint-light);
+            color: var(--mint);
+        }
+
+        /* How it works */
+        .how {
+            padding: 100px 40px;
+            background: var(--white);
+        }
+
+        .how-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .how h2 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 60px;
+        }
+
+        .how-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            text-align: left;
+        }
+
+        .how-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 28px;
+        }
+
+        .how-step-num {
+            width: 52px;
+            height: 52px;
+            background: var(--gray-900);
+            color: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .how-step h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .how-step p {
+            font-size: 16px;
+            color: var(--gray-600);
+        }
+
+        /* Pricing */
+        .pricing {
+            padding: 120px 40px;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .pricing > p {
+            font-size: 18px;
+            color: var(--gray-600);
+            margin-bottom: 48px;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            border-radius: 32px;
+            padding: 48px;
+            max-width: 420px;
+            margin: 0 auto;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+        }
+
+        .pricing-amount {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .pricing-amount .currency {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .pricing-amount .price {
+            font-size: 64px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .pricing-amount .period {
+            font-size: 18px;
+            color: var(--gray-400);
+        }
+
+        .pricing-desc {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 32px;
+        }
+
+        .pricing-features {
+            text-align: left;
+            margin-bottom: 32px;
+        }
+
+        .pricing-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 15px;
+        }
+
+        .pricing-feature:last-child {
+            border-bottom: none;
+        }
+
+        .pricing-feature-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .pricing-feature-icon.mint { background: var(--mint-light); }
+        .pricing-feature-icon.blue { background: var(--blue-light); }
+        .pricing-feature-icon.peach { background: var(--peach-light); }
+        .pricing-feature-icon.purple { background: var(--purple-light); }
+
+        .pricing-cta {
+            display: block;
+            width: 100%;
+            background: var(--gray-900);
+            color: white;
+            padding: 18px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .pricing-cta:hover {
+            background: var(--gray-800);
+            transform: translateY(-2px);
+        }
+
+        .pricing-note {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 100px 40px;
+            background: var(--white);
+        }
+
+        .faq-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq h2 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .faq-item {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-item h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .faq-item p {
+            font-size: 15px;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--gray-900);
+        }
+
+        .footer-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(145deg, #b8e6d4 0%, #7fd4b3 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-logo-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .footer p {
+            font-size: 14px;
+            color: var(--gray-400);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav { padding: 16px 20px; }
+            .hero { padding: 60px 20px 80px; }
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 17px; }
+            .preview { padding: 0 20px; }
+            .features { padding: 80px 20px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .features-header h2, .how h2, .pricing h2, .faq h2 { font-size: 32px; }
+            .how { padding: 80px 20px; }
+            .pricing { padding: 80px 20px; }
+            .faq { padding: 80px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">
+            <div class="nav-logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.31391C3 9.00773 3.14027 8.71843 3.38065 8.52879L11.3807 2.21793C11.7438 1.93142 12.2562 1.93142 12.6193 2.21793L20.6193 8.52879C20.8597 8.71843 21 9.00773 21 9.31391V20ZM7 12C7 14.7614 9.23858 17 12 17C14.7614 17 17 14.7614 17 12H15C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12H7Z"/></svg>
+            </div>
+            minihost
+        </a>
+        <a href="#pricing" class="nav-cta">Get started</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span>✨</span>
+            Made for hosts with 1–3 places
+        </div>
+        <h1>The little helper for <span class="highlight">Airbnb hosts</span></h1>
+        <p>4 simple tools. No dashboard. No complexity. Just the stuff that actually helps.</p>
+        <a href="#pricing" class="hero-cta">
+            Try it — €9/month
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <p class="hero-sub">Cancel anytime. Seriously.</p>
+    </section>
+
+    <!-- Preview -->
+    <div class="preview">
+        <div class="preview-card">
+            <div class="preview-header">
+                <div class="preview-icon">☀️</div>
+                <div>
+                    <h3>Daily Digest</h3>
+                    <p>Your morning briefing</p>
+                </div>
+                <span class="preview-header-date">Wednesday, Dec 4</span>
+            </div>
+            <div class="preview-content">
+                <p>A quiet day ahead — one check-out at 10, one check-in at 4. Sophie (2 guests) arrives this afternoon. She asked about parking but it's already in your GuestBook.</p>
+                <div class="preview-alert">
+                    <span>⚠️</span>
+                    <div><strong>Keep an eye on:</strong> Your Friday guest changed dates twice and has no reviews.</div>
+                </div>
+                <div class="preview-action">
+                    → Reply to Marc about early check-in
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="features-header">
+            <h2>4 tools. That's it.</h2>
+            <p>Each one solves a real problem. Nothing more.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon mint">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:28px;height:28px"><path d="M11 1V2H7C5.34315 2 4 3.34315 4 5V8C4 10.7614 6.23858 13 9 13H15C17.7614 13 20 10.7614 20 8V5C20 3.34315 18.6569 2 17 2H13V1H11ZM6 5C6 4.44772 6.44772 4 7 4H17C17.5523 4 18 4.44772 18 5V8C18 9.65685 16.6569 11 15 11H9C7.34315 11 6 9.65685 6 8V5ZM9.5 9C10.3284 9 11 8.32843 11 7.5C11 6.67157 10.3284 6 9.5 6C8.67157 6 8 6.67157 8 7.5C8 8.32843 8.67157 9 9.5 9ZM14.5 9C15.3284 9 16 8.32843 16 7.5C16 6.67157 15.3284 6 14.5 6C13.6716 6 13 6.67157 13 7.5C13 8.32843 13.6716 9 14.5 9ZM6 22C6 18.6863 8.68629 16 12 16C15.3137 16 18 18.6863 18 22H20C20 17.5817 16.4183 14 12 14C7.58172 14 4 17.5817 4 22H6Z"/></svg>
+                </div>
+                <h3>AiReply</h3>
+                <p>Paste a guest message, get a perfect reply. Matches your tone, knows your rules, always polite.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon peach">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:28px;height:28px"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"/></svg>
+                </div>
+                <h3>Daily Digest</h3>
+                <p>One calm summary each morning. Who's checking in, who's out, what needs your attention.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon blue">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:28px;height:28px"><path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z"/></svg>
+                </div>
+                <h3>SecretScripts</h3>
+                <p>Entry codes, WiFi, house rules — sent at the right time, automatically. You set it once.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:28px;height:28px"><path d="M9.36556 10.6821C10.302 12.3288 11.6712 13.698 13.3179 14.6344L14.2024 13.3961C14.4965 12.9845 15.0516 12.8573 15.4956 13.0998C16.9024 13.8683 18.4571 14.3353 20.0789 14.4637C20.599 14.5049 21 14.9389 21 15.4606V19.9234C21 20.4361 20.6122 20.8657 20.1022 20.9181C19.5723 20.9726 19.0377 21 18.5 21C9.93959 21 3 14.0604 3 5.5C3 4.96227 3.02742 4.42771 3.08189 3.89776C3.1343 3.38775 3.56394 3 4.07665 3H8.53942C9.0611 3 9.49513 3.40104 9.5363 3.92109C9.66467 5.54288 10.1317 7.09764 10.9002 8.50444C11.1427 8.9484 11.0155 9.50354 10.6039 9.79757L9.36556 10.6821ZM6.84425 10.0252L8.7442 8.66809C8.20547 7.50514 7.83628 6.27183 7.64727 5H5.00907C5.00303 5.16632 5 5.333 5 5.5C5 12.9558 11.0442 19 18.5 19C18.667 19 18.8337 18.997 19 18.9909V16.3527C17.7282 16.1637 16.4949 15.7945 15.3319 15.2558L13.9748 17.1558C13.4258 16.9425 12.8956 16.6915 12.3874 16.4061L12.3293 16.373C10.3697 15.2587 8.74134 13.6303 7.627 11.6707L7.59394 11.6126C7.30849 11.1044 7.05754 10.5742 6.84425 10.0252Z"/></svg>
+                </div>
+                <h3>SmartCall</h3>
+                <p>Guests can reach you by phone during their stay. No spam, no strangers, just your guests.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how">
+        <div class="how-inner">
+            <h2>Setup takes 5 minutes</h2>
+            <div class="how-steps">
+                <div class="how-step">
+                    <div class="how-step-num">1</div>
+                    <div>
+                        <h3>Connect your calendar</h3>
+                        <p>Paste your Airbnb iCal link. We sync your bookings automatically, no passwords needed.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="how-step-num">2</div>
+                    <div>
+                        <h3>Answer a few questions</h3>
+                        <p>Tell us your check-in time, WiFi password, and house rules. We'll remember everything.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="how-step-num">3</div>
+                    <div>
+                        <h3>Let us help</h3>
+                        <p>Get your daily digest, generate replies, send instructions — all on autopilot.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <h2>Simple pricing</h2>
+        <p>One plan. Everything included.</p>
+        <div class="pricing-card">
+            <div class="pricing-amount">
+                <span class="currency">€</span>
+                <span class="price">9</span>
+                <span class="period">/month</span>
+            </div>
+            <p class="pricing-desc">For up to 3 properties</p>
+            <div class="pricing-features">
+                <div class="pricing-feature">
+                    <div class="pricing-feature-icon mint">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M11 1V2H7C5.34315 2 4 3.34315 4 5V8C4 10.7614 6.23858 13 9 13H15C17.7614 13 20 10.7614 20 8V5C20 3.34315 18.6569 2 17 2H13V1H11ZM6 5C6 4.44772 6.44772 4 7 4H17C17.5523 4 18 4.44772 18 5V8C18 9.65685 16.6569 11 15 11H9C7.34315 11 6 9.65685 6 8V5ZM9.5 9C10.3284 9 11 8.32843 11 7.5C11 6.67157 10.3284 6 9.5 6C8.67157 6 8 6.67157 8 7.5C8 8.32843 8.67157 9 9.5 9ZM14.5 9C15.3284 9 16 8.32843 16 7.5C16 6.67157 15.3284 6 14.5 6C13.6716 6 13 6.67157 13 7.5C13 8.32843 13.6716 9 14.5 9ZM6 22C6 18.6863 8.68629 16 12 16C15.3137 16 18 18.6863 18 22H20C20 17.5817 16.4183 14 12 14C7.58172 14 4 17.5817 4 22H6Z"/></svg>
+                    </div>
+                    <span>AiReply — unlimited replies</span>
+                </div>
+                <div class="pricing-feature">
+                    <div class="pricing-feature-icon peach">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"/></svg>
+                    </div>
+                    <span>Daily Digest — every morning</span>
+                </div>
+                <div class="pricing-feature">
+                    <div class="pricing-feature-icon blue">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z"/></svg>
+                    </div>
+                    <span>SecretScripts — automated messages</span>
+                </div>
+                <div class="pricing-feature">
+                    <div class="pricing-feature-icon purple">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M9.36556 10.6821C10.302 12.3288 11.6712 13.698 13.3179 14.6344L14.2024 13.3961C14.4965 12.9845 15.0516 12.8573 15.4956 13.0998C16.9024 13.8683 18.4571 14.3353 20.0789 14.4637C20.599 14.5049 21 14.9389 21 15.4606V19.9234C21 20.4361 20.6122 20.8657 20.1022 20.9181C19.5723 20.9726 19.0377 21 18.5 21C9.93959 21 3 14.0604 3 5.5C3 4.96227 3.02742 4.42771 3.08189 3.89776C3.1343 3.38775 3.56394 3 4.07665 3H8.53942C9.0611 3 9.49513 3.40104 9.5363 3.92109C9.66467 5.54288 10.1317 7.09764 10.9002 8.50444C11.1427 8.9484 11.0155 9.50354 10.6039 9.79757L9.36556 10.6821ZM6.84425 10.0252L8.7442 8.66809C8.20547 7.50514 7.83628 6.27183 7.64727 5H5.00907C5.00303 5.16632 5 5.333 5 5.5C5 12.9558 11.0442 19 18.5 19C18.667 19 18.8337 18.997 19 18.9909V16.3527C17.7282 16.1637 16.4949 15.7945 15.3319 15.2558L13.9748 17.1558C13.4258 16.9425 12.8956 16.6915 12.3874 16.4061L12.3293 16.373C10.3697 15.2587 8.74134 13.6303 7.627 11.6707L7.59394 11.6126C7.30849 11.1044 7.05754 10.5742 6.84425 10.0252Z"/></svg>
+                    </div>
+                    <span>SmartCall — guest-only phone line</span>
+                </div>
+            </div>
+            <a href="#" class="pricing-cta">Start now</a>
+            <p class="pricing-note">No credit card required to try</p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="faq-inner">
+            <h2>Questions?</h2>
+            <div class="faq-item">
+                <h3>Do I need to give you my Airbnb password?</h3>
+                <p>No. We only use your public iCal link to sync bookings. We never access your Airbnb account.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What if I have more than 3 properties?</h3>
+                <p>This tool is designed for small hosts. If you have 10+ places, you probably need Hospitable or Guesty. We're the simple option.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I cancel anytime?</h3>
+                <p>Yes. No contracts, no annual plans. Cancel with one click, keep access until the end of your billing period.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Does AiReply actually sound like me?</h3>
+                <p>Yes. During setup, you tell us your tone and style. It learns your vibe and writes like you would — just faster.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-logo">
+            <div class="footer-logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.31391C3 9.00773 3.14027 8.71843 3.38065 8.52879L11.3807 2.21793C11.7438 1.93142 12.2562 1.93142 12.6193 2.21793L20.6193 8.52879C20.8597 8.71843 21 9.00773 21 9.31391V20ZM7 12C7 14.7614 9.23858 17 12 17C14.7614 17 17 14.7614 17 12H15C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12H7Z"/></svg>
+            </div>
+            minihost
+        </div>
+        <p>Made for small hosts, with love.</p>
+    </footer>
+</body>
+</html>

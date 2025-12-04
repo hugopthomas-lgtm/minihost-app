@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
-
 * {
   margin: 0;
   padding: 0;
@@ -7,30 +5,29 @@
 }
 
 :root {
-  --black: #2d2d2d;
+  --bg: #f8f9fa;
   --white: #fff;
-  --cream: #fffbf5;
-  --gray: #888;
-  --gray-light: #e8e8e8;
-  --green: #34d399;
-  --green-dark: #059669;
-  --green-light: #ecfdf5;
-  --pink: #fce7f3;
-  --pink-dark: #ec4899;
-  --blue: #dbeafe;
-  --blue-dark: #3b82f6;
-  --purple: #ede9fe;
-  --purple-dark: #8b5cf6;
-  --yellow: #fef3c7;
-  --yellow-dark: #f59e0b;
-  --red-light: #fee2e2;
-  --red: #ef4444;
+  --gray-50: #f1f3f4;
+  --gray-100: #e8eaed;
+  --gray-300: #dadce0;
+  --gray-400: #9aa0a6;
+  --gray-600: #5f6368;
+  --gray-800: #3c4043;
+  --gray-900: #202124;
+  --mint: #34a853;
+  --mint-light: #e6f4ea;
+  --blue: #4285f4;
+  --blue-light: #e8f0fe;
+  --peach: #fbbc04;
+  --peach-light: #fef7e0;
+  --purple: #a855f7;
+  --purple-light: #f3e8ff;
 }
 
 body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--cream);
-  color: var(--black);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--gray-900);
   line-height: 1.6;
 }
 
