@@ -8,10 +8,19 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { guestMessage, userId } = await request.json()
+    const { 
+      conversation, 
+      myDraft,
+      userId, 
+      humanity = 3, 
+      warmth = 3, 
+      length = 3,
+      extraApologetic = false,
+      addEmojis = false
+    } = await request.json()
 
-    if (!guestMessage) {
-      return NextResponse.json({ error: 'Message required' }, { status: 400 })
+    if (!conversation) {
+      return NextResponse.json({ error: 'Conversation required' }, { status: 400 })
     }
 
     // Load host settings from database
@@ -36,40 +45,55 @@ export async function POST(request: NextRequest) {
       if (property) propertyInfo = property
     }
 
-    const systemPrompt = `You are helping an Airbnb host reply to guest messages. Your job is to write replies that sound EXACTLY like the host.
+    // Build style instructions based on sliders
+    const humanityText = humanity <= 2 ? 'Perfect grammar and spelling, very polished' 
+      : humanity <= 4 ? 'Natural and relaxed writing style'
+      : 'Casual with small imperfections (occasional typo, missing punctuation, informal)'
+    
+    const warmthText = warmth <= 2 ? 'Direct and to-the-point, minimal pleasantries'
+      : warmth <= 4 ? 'Friendly but efficient'
+      : 'Very warm, extra polite, lots of pleasantries and care'
+    
+    const lengthText = length <= 2 ? '1-2 sentences max, very brief'
+      : length <= 4 ? '2-4 sentences, balanced'
+      : '4-6 sentences, detailed and thorough'
 
-HOST'S VOICE & STYLE:
-- Tone: ${hostSettings.tone || 'warm and friendly'}
-- Greeting: ${hostSettings.greeting || 'Hi'}
-- Sign-off: ${hostSettings.sign_off || ''}
-${hostSettings.sample_messages ? `
-EXAMPLES OF HOW THIS HOST WRITES (copy this style!):
-${hostSettings.sample_messages}
-` : ''}
+    const systemPrompt = `You are helping an Airbnb host reply to guest messages. 
+${myDraft ? 'Your job is to IMPROVE the host\'s draft - keep their message but make it better.' : 'Your job is to write a reply that sounds EXACTLY like the host.'}
+
+STYLE FOR THIS MESSAGE:
+- ${humanityText}
+- ${warmthText}
+- ${lengthText}
+${extraApologetic ? '- Be EXTRA apologetic and understanding - this is a difficult situation' : ''}
+${addEmojis ? '- Add 1-3 friendly emojis where appropriate' : '- No emojis unless the host\'s style uses them'}
+
+HOST'S VOICE (learn from these examples):
+${hostSettings.sample_messages?.length > 0 ? hostSettings.sample_messages.map((m: string, i: number) => `Example ${i+1}: "${m}"`).join('\n') : 'No examples provided - be natural and friendly'}
 
 HOST'S RULES:
 - Check-in: ${propertyInfo.check_in_time || '4 PM'}
 - Check-out: ${propertyInfo.check_out_time || '10 AM'}
-- Early check-in policy: ${hostSettings.early_checkin_policy || 'sometimes possible, need to check'}
-- Late check-out policy: ${hostSettings.late_checkout_policy || 'sometimes possible, need to check'}
-${hostSettings.hard_nos ? `- NEVER do these things: ${hostSettings.hard_nos}` : ''}
+- Early check-in: ${hostSettings.early_checkin_policy || 'sometimes possible'}
+- Late check-out: ${hostSettings.late_checkout_policy || 'sometimes possible'}
+- Pets: ${hostSettings.pets_policy || 'ask first'}
+- Parties: ${hostSettings.parties_policy || 'no'}
+- Smoking: ${hostSettings.smoking_policy || 'no'}
 
 PROPERTY INFO:
-- Name: ${propertyInfo.name || 'the property'}
-- WiFi: ${propertyInfo.wifi_password || 'will be provided'}
-- Entry: ${propertyInfo.entry_instructions || 'will be provided'}
-- Parking: ${propertyInfo.parking_info || 'info available on arrival'}
-${propertyInfo.house_rules ? `- House rules: ${propertyInfo.house_rules}` : ''}
+- WiFi: ${propertyInfo.wifi_name || 'available'} / ${propertyInfo.wifi_password || 'password on arrival'}
+- Entry: ${propertyInfo.entry_instructions || 'details on arrival'}
+- Parking: ${propertyInfo.parking_info || 'info available'}
 
 GUIDELINES:
-- Write in the EXACT same style as the sample messages
-- Be helpful and answer their questions directly
-- Keep it concise (2-5 sentences usually)
-- Use emojis sparingly (0-2 max), only if the host's samples use them
-- Never promise things that aren't in the rules
-- If unsure about something, say you'll check and get back to them
-- Start with the host's preferred greeting
-- End with the host's sign-off if they have one`
+- Match the host's writing style from the examples
+- Answer their questions directly
+- Never promise things outside the rules
+- If unsure, say you'll check`
+
+    const userMessage = myDraft 
+      ? `Guest message:\n"${conversation}"\n\nHost's draft to improve:\n"${myDraft}"\n\nImprove this draft while keeping the host's intent:`
+      : `Guest message/conversation:\n"${conversation}"\n\nWrite a reply as this host:`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -85,7 +109,7 @@ GUIDELINES:
         messages: [
           {
             role: 'user',
-            content: `Guest message:\n"${guestMessage}"\n\nWrite a reply as this host:`
+            content: userMessage
           }
         ]
       })

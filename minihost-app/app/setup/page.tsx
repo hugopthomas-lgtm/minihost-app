@@ -16,10 +16,6 @@ export default function SetupPage() {
   const [newMessage, setNewMessage] = useState('')
   const [addingMessage, setAddingMessage] = useState(false)
 
-  // Style settings
-  const [humanity, setHumanity] = useState(50)
-  const [warmth, setWarmth] = useState(50)
-
   // Rules settings
   const [checkInTime, setCheckInTime] = useState('16:00')
   const [checkOutTime, setCheckOutTime] = useState('10:00')
@@ -62,8 +58,6 @@ export default function SetupPage() {
 
     if (data) {
       if (data.sample_messages) setSampleMessages(data.sample_messages)
-      setHumanity(data.humanity ?? 50)
-      setWarmth(data.warmth ?? 50)
       setEarlyCheckIn(data.early_checkin_policy || 'sometimes')
       setLateCheckOut(data.late_checkout_policy || 'sometimes')
       setPets(data.pets_policy || 'no')
@@ -98,8 +92,6 @@ export default function SetupPage() {
       .upsert({
         user_id: user.id,
         sample_messages: updatedMessages,
-        humanity,
-        warmth,
       }, { onConflict: 'user_id' })
 
     setSampleMessages(updatedMessages)

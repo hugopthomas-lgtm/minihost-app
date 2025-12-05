@@ -170,28 +170,6 @@
   padding: 24px 40px;
 }
 
-.topBar {
-  margin-bottom: 32px;
-}
-
-.propertySelector {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: white;
-  padding: 12px 20px;
-  border-radius: 50px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  transition: all 0.2s;
-}
-
-.propertySelector:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-}
-
 .content {
   max-width: 680px;
 }
@@ -399,4 +377,180 @@
   font-size: 15px;
   color: #5f6368;
   margin: 0;
+}
+
+/* Style Sliders */
+.optionsCard {
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sliderRow:last-of-type {
+  margin-bottom: 16px;
+}
+
+.optionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+  min-width: 80px;
+}
+
+.levelSelector {
+  display: flex;
+  gap: 6px;
+}
+
+.levelBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 2px solid #e8eaed;
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5f6368;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.levelBtn:hover {
+  border-color: #dadce0;
+  background: #f8f9fa;
+}
+
+.levelActive {
+  background: #34a853 !important;
+  border-color: #34a853 !important;
+  color: white !important;
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #e8eaed;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #3c4043;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: #34a853;
+  cursor: pointer;
+}
+
+/* Card Label */
+.cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3c4043;
+  margin-bottom: 12px;
+}
+
+.cardLabel span {
+  font-size: 16px;
+}
+
+/* Action Bar */
+.actionBar {
+  display: flex;
+  gap: 12px;
+}
+
+.aiBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 28px;
+  background: #202124;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.aiBtn:hover:not(:disabled) {
+  background: #3c4043;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.aiBtn:disabled {
+  background: #9aa0a6;
+  cursor: not-allowed;
+}
+
+.aiBtn svg {
+  transition: transform 0.2s;
+}
+
+.aiBtn:hover:not(:disabled) svg {
+  transform: rotate(90deg);
+}
+
+.copyBtn {
+  padding: 16px 28px;
+  background: white;
+  color: #3c4043;
+  border: 2px solid #e8eaed;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyBtn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #dadce0;
+}
+
+.copyBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .sliderRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .checkboxRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .actionBar {
+    flex-direction: column;
+  }
 }

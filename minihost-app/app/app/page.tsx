@@ -9,9 +9,17 @@ export default function AppDashboard() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [guestMessage, setGuestMessage] = useState('')
-  const [generatedReply, setGeneratedReply] = useState('')
+  const [conversation, setConversation] = useState('')
+  const [myReply, setMyReply] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
+  
+  // Per-message style settings (1-6, default 3)
+  const [humanity, setHumanity] = useState(3)
+  const [warmth, setWarmth] = useState(3)
+  const [length, setLength] = useState(3)
+  const [extraApologetic, setExtraApologetic] = useState(false)
+  const [addEmojis, setAddEmojis] = useState(false)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -31,34 +39,49 @@ export default function AppDashboard() {
     router.push('/')
   }
 
-  const generateReply = async () => {
-    if (!guestMessage.trim()) return
+  const handleAI = async () => {
+    if (!conversation.trim()) return
     setGenerating(true)
-    setGeneratedReply('')
+    
+    const isImprove = myReply.trim().length > 0
     
     try {
       const response = await fetch('/api/generate-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestMessage,
-          userId: user?.id
+          conversation,
+          myDraft: isImprove ? myReply : null,
+          userId: user?.id,
+          humanity,
+          warmth,
+          length,
+          extraApologetic,
+          addEmojis
         })
       })
       
       const data = await response.json()
       
       if (data.error) {
-        setGeneratedReply('Sorry, there was an error generating the reply. Please try again.')
+        setMyReply('Sorry, there was an error. Please try again.')
       } else {
-        setGeneratedReply(data.reply)
+        setMyReply(data.reply)
       }
     } catch (error) {
-      setGeneratedReply('Sorry, there was an error. Please try again.')
+      setMyReply('Sorry, there was an error. Please try again.')
     } finally {
       setGenerating(false)
     }
   }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(myReply)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  const buttonText = myReply.trim() ? 'Improve with AI' : 'Suggest with AI'
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>
@@ -88,10 +111,6 @@ export default function AppDashboard() {
             <span className={styles.navTooltip}>Scripts</span>
           </div>
           <div className={styles.navItem}>
-            <svg viewBox="0 0 24 24"><path d="M9.36556 10.6821C10.302 12.3288 11.6712 13.698 13.3179 14.6344L14.2024 13.3961C14.4965 12.9845 15.0516 12.8573 15.4956 13.0998C16.9024 13.8683 18.4571 14.3353 20.0789 14.4637C20.599 14.5049 21 14.9389 21 15.4606V19.9234C21 20.4361 20.6122 20.8657 20.1022 20.9181C19.5723 20.9726 19.0377 21 18.5 21C9.93959 21 3 14.0604 3 5.5C3 4.96227 3.02742 4.42771 3.08189 3.89776C3.1343 3.38775 3.56394 3 4.07665 3H8.53942C9.0611 3 9.49513 3.40104 9.5363 3.92109C9.66467 5.54288 10.1317 7.09764 10.9002 8.50444C11.1427 8.9484 11.0155 9.50354 10.6039 9.79757L9.36556 10.6821ZM6.84425 10.0252L8.7442 8.66809C8.20547 7.50514 7.83628 6.27183 7.64727 5H5.00907C5.00303 5.16632 5 5.333 5 5.5C5 12.9558 11.0442 19 18.5 19C18.667 19 18.8337 18.997 19 18.9909V16.3527C17.7282 16.1637 16.4949 15.7945 15.3319 15.2558L13.9748 17.1558C13.4258 16.9425 12.8956 16.6915 12.3874 16.4061L12.3293 16.373C10.3697 15.2587 8.74134 13.6303 7.627 11.6707L7.59394 11.6126C7.30849 11.1044 7.05754 10.5742 6.84425 10.0252Z"/></svg>
-            <span className={styles.navTooltip}>SmartCall</span>
-          </div>
-          <div className={styles.navItem}>
             <svg viewBox="0 0 24 24"><path d="M13 21V23H11V21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3H9C10.1947 3 11.2671 3.52375 12 4.35418C12.7329 3.52375 13.8053 3 15 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H13ZM20 19V5H15C13.8954 5 13 5.89543 13 7V19H20ZM11 19V7C11 5.89543 10.1046 5 9 5H4V19H11Z"/></svg>
             <span className={styles.navTooltip}>GuestBook</span>
           </div>
@@ -114,94 +133,124 @@ export default function AppDashboard() {
 
       {/* Main */}
       <main className={styles.main}>
-        <div className={styles.topBar}>
-          <div className={styles.propertySelector}>
-            <span>🏡</span>
-            <span>My Property</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </div>
-        </div>
-
         <div className={styles.content}>
           <div className={styles.header}>
             <h1>AiReply ✨</h1>
-            <p>Paste a guest message, get a perfect reply</p>
+            <p>Paste the conversation, get your reply</p>
           </div>
 
-          {/* Input Card */}
+          {/* Conversation Input */}
           <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={`${styles.cardIcon} ${styles.blue}`}>
-                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-              </div>
-              <div>
-                <h3>Paste their message</h3>
-                <p>Copy-paste what the guest sent you</p>
-              </div>
+            <div className={styles.cardLabel}>
+              <span>💬</span> Conversation
             </div>
             <textarea
               className={styles.textarea}
-              placeholder="Hi! We're arriving tomorrow around 2pm. Is early check-in possible? Also, where can we park?"
-              value={guestMessage}
-              onChange={(e) => setGuestMessage(e.target.value)}
+              placeholder="Paste the guest message (or full conversation history)..."
+              value={conversation}
+              onChange={(e) => setConversation(e.target.value)}
             />
-            <button 
-              className={styles.generateBtn}
-              onClick={generateReply}
-              disabled={generating || !guestMessage.trim()}
-            >
-              {generating ? 'Generating...' : 'Generate reply'}
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
           </div>
 
-          {/* Output Card */}
-          {generatedReply && (
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div className={`${styles.cardIcon} ${styles.mint}`}>
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h3>Ready to send</h3>
-                  <p className={styles.mintText}>Your reply is ready</p>
-                </div>
-              </div>
-              <div className={styles.replyBox}>
-                {generatedReply}
-              </div>
-              <div className={styles.actions}>
-                <button 
-                  className={styles.copyBtn}
-                  onClick={() => navigator.clipboard.writeText(generatedReply)}
-                >
-                  Copy
-                </button>
-                <div className={styles.tags}>
-                  <button className={styles.tag}>Regenerate</button>
-                  <button className={styles.tag}>Shorter</button>
-                  <button className={styles.tag}>Warmer</button>
-                  <button className={styles.tag}>More formal</button>
-                </div>
-              </div>
+          {/* Your Reply */}
+          <div className={styles.card}>
+            <div className={styles.cardLabel}>
+              <span>✍️</span> Your reply
             </div>
-          )}
+            <textarea
+              className={styles.textarea}
+              placeholder="Write something or let AI suggest..."
+              value={myReply}
+              onChange={(e) => setMyReply(e.target.value)}
+            />
+          </div>
 
-          {/* Today Card */}
-          <div className={styles.todayCard}>
-            <div className={styles.todayHeader}>
-              <span>☀️</span>
-              <h3>Today</h3>
+          {/* Style Options */}
+          <div className={styles.optionsCard}>
+            <div className={styles.sliderRow}>
+              <span className={styles.optionLabel}>Humanity</span>
+              <div className={styles.levelSelector}>
+                {[1,2,3,4,5,6].map(n => (
+                  <button 
+                    key={n}
+                    className={`${styles.levelBtn} ${humanity === n ? styles.levelActive : ''}`}
+                    onClick={() => setHumanity(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p>No check-ins or check-outs today. Enjoy your day!</p>
+            
+            <div className={styles.sliderRow}>
+              <span className={styles.optionLabel}>Warmth</span>
+              <div className={styles.levelSelector}>
+                {[1,2,3,4,5,6].map(n => (
+                  <button 
+                    key={n}
+                    className={`${styles.levelBtn} ${warmth === n ? styles.levelActive : ''}`}
+                    onClick={() => setWarmth(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className={styles.sliderRow}>
+              <span className={styles.optionLabel}>Length</span>
+              <div className={styles.levelSelector}>
+                {[1,2,3,4,5,6].map(n => (
+                  <button 
+                    key={n}
+                    className={`${styles.levelBtn} ${length === n ? styles.levelActive : ''}`}
+                    onClick={() => setLength(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.checkboxRow}>
+              <label className={styles.checkbox}>
+                <input 
+                  type="checkbox" 
+                  checked={extraApologetic}
+                  onChange={(e) => setExtraApologetic(e.target.checked)}
+                />
+                <span>Extra apologetic</span>
+              </label>
+              <label className={styles.checkbox}>
+                <input 
+                  type="checkbox" 
+                  checked={addEmojis}
+                  onChange={(e) => setAddEmojis(e.target.checked)}
+                />
+                <span>Add emojis</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className={styles.actionBar}>
+            <button 
+              className={styles.aiBtn}
+              onClick={handleAI}
+              disabled={generating || !conversation.trim()}
+            >
+              {generating ? 'Thinking...' : buttonText}
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 2L12 22M2 12L22 12"/>
+              </svg>
+            </button>
+            <button 
+              className={styles.copyBtn}
+              onClick={handleCopy}
+              disabled={!myReply.trim()}
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
           </div>
         </div>
       </main>
