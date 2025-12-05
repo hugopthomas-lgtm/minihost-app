@@ -113,19 +113,6 @@ export default function SetupPage() {
     setSampleMessages(updatedMessages)
   }
 
-  const saveStyleSettings = async (h: number, w: number) => {
-    if (!user) return
-    
-    await supabase
-      .from('host_settings')
-      .upsert({
-        user_id: user.id,
-        humanity: h,
-        warmth: w,
-        sample_messages: sampleMessages,
-      }, { onConflict: 'user_id' })
-  }
-
   const saveRulesAndPolicies = async () => {
     if (!user) return
     setSavingRules(true)
@@ -135,8 +122,6 @@ export default function SetupPage() {
       .upsert({
         user_id: user.id,
         sample_messages: sampleMessages,
-        humanity,
-        warmth,
         early_checkin_policy: earlyCheckIn,
         late_checkout_policy: lateCheckOut,
         pets_policy: pets,
@@ -160,16 +145,6 @@ export default function SetupPage() {
     setSavingRules(false)
     setSavedRules(true)
     setTimeout(() => setSavedRules(false), 2000)
-  }
-
-  const handleHumanityChange = (value: number) => {
-    setHumanity(value)
-    saveStyleSettings(value, warmth)
-  }
-
-  const handleWarmthChange = (value: number) => {
-    setWarmth(value)
-    saveStyleSettings(humanity, value)
   }
 
   if (loading) {
@@ -224,12 +199,6 @@ export default function SetupPage() {
             onClick={() => setActiveTab('voice')}
           >
             🎤 Your Voice
-          </button>
-          <button 
-            className={`${styles.tab} ${activeTab === 'style' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('style')}
-          >
-            ✨ Reply Style
           </button>
           <button 
             className={`${styles.tab} ${activeTab === 'rules' ? styles.activeTab : ''}`}
@@ -296,62 +265,6 @@ export default function SetupPage() {
                   💡 Tip: Add at least 3 messages for best results. The more examples, the better MiniHost learns your style.
                 </p>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Style Tab */}
-        {activeTab === 'style' && (
-          <div className={styles.tabContent}>
-            <div className={styles.card}>
-              <h3>Humanity Level</h3>
-              <p className={styles.cardDesc}>
-                In the age of AI, imperfections feel human. Add a touch of realness to your replies — 
-                small typos, missing spaces, casual punctuation.
-              </p>
-              
-              <div className={styles.sliderContainer}>
-                <div className={styles.sliderLabels}>
-                  <span>🤖 Perfect</span>
-                  <span>🙂 Human</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={humanity}
-                  onChange={(e) => handleHumanityChange(Number(e.target.value))}
-                  className={styles.slider}
-                />
-                <div className={styles.sliderValue}>
-                  {humanity < 30 ? 'Flawless grammar' : humanity < 70 ? 'Natural, relaxed' : 'Casual with small imperfections'}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.card}>
-              <h3>Warmth Level</h3>
-              <p className={styles.cardDesc}>
-                How much warmth and politeness in your replies? From straight-to-the-point to extra friendly.
-              </p>
-              
-              <div className={styles.sliderContainer}>
-                <div className={styles.sliderLabels}>
-                  <span>😐 Minimal</span>
-                  <span>🤗 Extra warm</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={warmth}
-                  onChange={(e) => handleWarmthChange(Number(e.target.value))}
-                  className={styles.slider}
-                />
-                <div className={styles.sliderValue}>
-                  {warmth < 30 ? '"Check-in is at 4pm."' : warmth < 70 ? '"Hi! Check-in is at 4pm, let me know if you need anything."' : '"Hi there! So excited to host you! Check-in is at 4pm — please don\'t hesitate to reach out if you have any questions at all! 😊"'}
-                </div>
-              </div>
             </div>
           </div>
         )}
