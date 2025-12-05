@@ -9,15 +9,16 @@ export default function SetupPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('voice')
 
   // Voice settings
-  const [sampleMessages, setSampleMessages] = useState(['', '', ''])
-  const [tone, setTone] = useState('warm')
-  const [greeting, setGreeting] = useState('Hi')
-  const [signOff, setSignOff] = useState('')
+  const [sampleMessages, setSampleMessages] = useState<string[]>([])
+  const [newMessage, setNewMessage] = useState('')
+  const [addingMessage, setAddingMessage] = useState(false)
+
+  // Style settings
+  const [humanity, setHumanity] = useState(50)
+  const [warmth, setWarmth] = useState(50)
 
   // Rules settings
   const [checkInTime, setCheckInTime] = useState('16:00')
@@ -33,6 +34,10 @@ export default function SetupPage() {
   const [pets, setPets] = useState('no')
   const [parties, setParties] = useState('no')
   const [smoking, setSmoking] = useState('no')
+
+  // Saving states
+  const [savingRules, setSavingRules] = useState(false)
+  const [savedRules, setSavedRules] = useState(false)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -56,10 +61,9 @@ export default function SetupPage() {
       .single()
 
     if (data) {
-      setTone(data.tone || 'warm')
-      setGreeting(data.greeting || 'Hi')
-      setSignOff(data.sign_off || '')
       if (data.sample_messages) setSampleMessages(data.sample_messages)
+      setHumanity(data.humanity ?? 50)
+      setWarmth(data.warmth ?? 50)
       setEarlyCheckIn(data.early_checkin_policy || 'sometimes')
       setLateCheckOut(data.late_checkout_policy || 'sometimes')
       setPets(data.pets_policy || 'no')
@@ -83,18 +87,64 @@ export default function SetupPage() {
     }
   }
 
-  const saveSettings = async () => {
+  const addSampleMessage = async () => {
+    if (!newMessage.trim() || !user) return
+    setAddingMessage(true)
+
+    const updatedMessages = [...sampleMessages, newMessage.trim()]
+    
+    await supabase
+      .from('host_settings')
+      .upsert({
+        user_id: user.id,
+        sample_messages: updatedMessages,
+        humanity,
+        warmth,
+      }, { onConflict: 'user_id' })
+
+    setSampleMessages(updatedMessages)
+    setNewMessage('')
+    setAddingMessage(false)
+  }
+
+  const removeSampleMessage = async (index: number) => {
     if (!user) return
-    setSaving(true)
+    const updatedMessages = sampleMessages.filter((_, i) => i !== index)
+    
+    await supabase
+      .from('host_settings')
+      .upsert({
+        user_id: user.id,
+        sample_messages: updatedMessages,
+      }, { onConflict: 'user_id' })
+
+    setSampleMessages(updatedMessages)
+  }
+
+  const saveStyleSettings = async (h: number, w: number) => {
+    if (!user) return
+    
+    await supabase
+      .from('host_settings')
+      .upsert({
+        user_id: user.id,
+        humanity: h,
+        warmth: w,
+        sample_messages: sampleMessages,
+      }, { onConflict: 'user_id' })
+  }
+
+  const saveRulesAndPolicies = async () => {
+    if (!user) return
+    setSavingRules(true)
 
     await supabase
       .from('host_settings')
       .upsert({
         user_id: user.id,
-        tone,
-        greeting,
-        sign_off: signOff,
-        sample_messages: sampleMessages.filter(m => m.trim()),
+        sample_messages: sampleMessages,
+        humanity,
+        warmth,
         early_checkin_policy: earlyCheckIn,
         late_checkout_policy: lateCheckOut,
         pets_policy: pets,
@@ -115,15 +165,19 @@ export default function SetupPage() {
         entry_instructions: entryInstructions,
       }, { onConflict: 'user_id' })
 
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    setSavingRules(false)
+    setSavedRules(true)
+    setTimeout(() => setSavedRules(false), 2000)
   }
 
-  const updateSampleMessage = (index: number, value: string) => {
-    const newMessages = [...sampleMessages]
-    newMessages[index] = value
-    setSampleMessages(newMessages)
+  const handleHumanityChange = (value: number) => {
+    setHumanity(value)
+    saveStyleSettings(value, warmth)
+  }
+
+  const handleWarmthChange = (value: number) => {
+    setWarmth(value)
+    saveStyleSettings(humanity, value)
   }
 
   if (loading) {
@@ -180,6 +234,12 @@ export default function SetupPage() {
             🎤 Your Voice
           </button>
           <button 
+            className={`${styles.tab} ${activeTab === 'style' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('style')}
+          >
+            ✨ Reply Style
+          </button>
+          <button 
             className={`${styles.tab} ${activeTab === 'rules' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('rules')}
           >
@@ -189,7 +249,7 @@ export default function SetupPage() {
             className={`${styles.tab} ${activeTab === 'policies' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('policies')}
           >
-            ✅ Your Policies
+            ✅ Policies
           </button>
         </div>
 
@@ -197,56 +257,107 @@ export default function SetupPage() {
         {activeTab === 'voice' && (
           <div className={styles.tabContent}>
             <div className={styles.card}>
-              <h3>Sample Messages</h3>
-              <p className={styles.cardDesc}>Paste 3 messages you've sent to guests. MiniHost will learn your style.</p>
+              <h3>Your Sample Messages</h3>
+              <p className={styles.cardDesc}>
+                Paste messages you've already sent to guests. MiniHost learns exactly how you write.
+              </p>
               
-              {sampleMessages.map((msg, i) => (
+              {/* Existing messages */}
+              {sampleMessages.length > 0 && (
+                <div className={styles.messagesList}>
+                  {sampleMessages.map((msg, i) => (
+                    <div key={i} className={styles.savedMessage}>
+                      <div className={styles.messageContent}>
+                        <span className={styles.messageNumber}>#{i + 1}</span>
+                        <p>{msg}</p>
+                      </div>
+                      <button 
+                        className={styles.removeBtn}
+                        onClick={() => removeSampleMessage(i)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new message */}
+              <div className={styles.addMessageBox}>
                 <textarea
-                  key={i}
                   className={styles.textarea}
-                  placeholder={`Message ${i + 1}: "Hi! Thanks for booking..."`}
-                  value={msg}
-                  onChange={(e) => updateSampleMessage(i, e.target.value)}
+                  placeholder="Paste a message you've sent to a guest... e.g. 'Hi! Thanks for booking! Check-in is at 4pm, I'll send you the door code the day before...'"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
                 />
-              ))}
+                <button 
+                  className={styles.addBtn}
+                  onClick={addSampleMessage}
+                  disabled={!newMessage.trim() || addingMessage}
+                >
+                  {addingMessage ? 'Adding...' : '+ Add this message'}
+                </button>
+              </div>
+
+              {sampleMessages.length === 0 && (
+                <p className={styles.hint}>
+                  💡 Tip: Add at least 3 messages for best results. The more examples, the better MiniHost learns your style.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Style Tab */}
+        {activeTab === 'style' && (
+          <div className={styles.tabContent}>
+            <div className={styles.card}>
+              <h3>Humanity Level</h3>
+              <p className={styles.cardDesc}>
+                In the age of AI, imperfections feel human. Add a touch of realness to your replies — 
+                small typos, missing spaces, casual punctuation.
+              </p>
+              
+              <div className={styles.sliderContainer}>
+                <div className={styles.sliderLabels}>
+                  <span>🤖 Perfect</span>
+                  <span>🙂 Human</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={humanity}
+                  onChange={(e) => handleHumanityChange(Number(e.target.value))}
+                  className={styles.slider}
+                />
+                <div className={styles.sliderValue}>
+                  {humanity < 30 ? 'Flawless grammar' : humanity < 70 ? 'Natural, relaxed' : 'Casual with small imperfections'}
+                </div>
+              </div>
             </div>
 
             <div className={styles.card}>
-              <h3>Tone & Style</h3>
+              <h3>Warmth Level</h3>
+              <p className={styles.cardDesc}>
+                How much warmth and politeness in your replies? From straight-to-the-point to extra friendly.
+              </p>
               
-              <div className={styles.field}>
-                <label>How do you usually sound?</label>
-                <div className={styles.options}>
-                  {['warm', 'professional', 'casual', 'friendly'].map(t => (
-                    <button
-                      key={t}
-                      className={`${styles.option} ${tone === t ? styles.selected : ''}`}
-                      onClick={() => setTone(t)}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
+              <div className={styles.sliderContainer}>
+                <div className={styles.sliderLabels}>
+                  <span>😐 Minimal</span>
+                  <span>🤗 Extra warm</span>
                 </div>
-              </div>
-
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label>Your greeting</label>
-                  <input
-                    type="text"
-                    placeholder="Hi"
-                    value={greeting}
-                    onChange={(e) => setGreeting(e.target.value)}
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Your sign-off</label>
-                  <input
-                    type="text"
-                    placeholder="Best, John"
-                    value={signOff}
-                    onChange={(e) => setSignOff(e.target.value)}
-                  />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={warmth}
+                  onChange={(e) => handleWarmthChange(Number(e.target.value))}
+                  className={styles.slider}
+                />
+                <div className={styles.sliderValue}>
+                  {warmth < 30 ? '"Check-in is at 4pm."' : warmth < 70 ? '"Hi! Check-in is at 4pm, let me know if you need anything."' : '"Hi there! So excited to host you! Check-in is at 4pm — please don\'t hesitate to reach out if you have any questions at all! 😊"'}
                 </div>
               </div>
             </div>
@@ -326,6 +437,17 @@ export default function SetupPage() {
                   onChange={(e) => setParkingInfo(e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Save Button */}
+            <div className={styles.saveBar}>
+              <button 
+                className={styles.saveBtn}
+                onClick={saveRulesAndPolicies}
+                disabled={savingRules}
+              >
+                {savingRules ? 'Saving...' : savedRules ? 'Saved ✓' : 'Save Rules'}
+              </button>
             </div>
           </div>
         )}
@@ -435,19 +557,19 @@ export default function SetupPage() {
                 </div>
               </div>
             </div>
+
+            {/* Save Button */}
+            <div className={styles.saveBar}>
+              <button 
+                className={styles.saveBtn}
+                onClick={saveRulesAndPolicies}
+                disabled={savingRules}
+              >
+                {savingRules ? 'Saving...' : savedRules ? 'Saved ✓' : 'Save Policies'}
+              </button>
+            </div>
           </div>
         )}
-
-        {/* Save Button */}
-        <div className={styles.saveBar}>
-          <button 
-            className={styles.saveBtn}
-            onClick={saveSettings}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Settings'}
-          </button>
-        </div>
       </main>
     </div>
   )
